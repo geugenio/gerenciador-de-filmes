@@ -1,115 +1,151 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {
-	private static List<Contato> contacts = new ArrayList<Contato>();
-	private static int idGenerator = 1;
-	
+import DAO.ContatoDAO;
+import entity.Contato;
+
+public class Main {	
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		inicializador();
-		
-		while(true) {
-			inicializador();
-			int opc = 0;
-			try {
-				System.out.println("Insira, com base no número(1 a 5), a operação desejada: ");
-				opc = Integer.parseInt(sc.nextLine());
-			} catch(Exception e) {
-				System.out.println("Erro! Tente novamente");
-			}
-
-			switch (opc) {
-			case 1: {
-				System.out.println("Insira o nome completo: ");
-				String completeName = sc.nextLine();
-
-				System.out.println("Insira o telefone: ");
-				String phone = sc.nextLine();
-				
-				System.out.println("Insira o E-mail: ");
-				String email = sc.nextLine();
+		try {
+			boolean programa = true;
+			while(programa) {
+				inicializador();
+				int opc = -1;
 				
 				try {
-					Contato ctt = new Contato(completeName, phone, email, idGenerator);
-					contacts.add(ctt);
-					idGenerator++;
-				}catch(Exception e) {
-					System.err.println("ERRO");
-					break;
+					System.out.println("Insira, com base no número(1 a 5), a operação desejada: ");
+					opc = Integer.parseInt(sc.nextLine());
+				} catch(Exception e) {
+					System.out.println("Erro! Tente novamente");
+					continue; //continua o loop
 				}
-				System.out.println("Contato criado!");
-				break;
-			}
-			case 2:{
-				System.out.print("Insira o ID do contato a abrir: ");
-				int cttId = sc.nextInt();
-				sc.nextLine();
-				Contato cttReturned = searchContatoById(cttId);
-				
-				if(cttReturned !=null) {
-					System.out.println(searchContatoById(cttId));
-				} else {
-					System.out.println("Erro ao identificar o contato de ID " + cttId + ", tente novamente.");
-				}
-				break;
-			}
-			
-			case 3:{
-				for (Contato ctt :contacts) {
-					System.out.println(ctt);
-				}
-				break;
-			}
-			case 4:{
-				System.out.print("Insira o ID do contato: ");
-				int cttId = sc.nextInt();
-				sc.nextLine();
-				
-				Contato cttReturned = searchContatoById(cttId);
-				if(cttReturned !=null) {
-					System.out.println("Contato de " + cttReturned.getNome() + " achado. Agora:");
-					System.out.print("Insira o novo nome completo: ");
+
+				switch (opc) {
+				case 1: {//CRIAÇÃO DE CONTATO
+					System.out.println("Insira o nome completo: ");
 					String completeName = sc.nextLine();
-					
-					System.out.print("Insira o novo telefone: ");
+
+					System.out.println("Insira o telefone: ");
 					String phone = sc.nextLine();
 					
-					System.out.print("Insira o novo E-mail: ");
+					System.out.println("Insira o E-mail: ");
 					String email = sc.nextLine();
-			        for (Contato contatoUn : contacts) {
-			            if (contatoUn.getId() == cttId) {
-			                contatoUn.setEmail(email);
-			                contatoUn.setNomeCompleto(completeName);
-			                contatoUn.setTelefone(phone);
-			            }
-			        }
 					
-				} else {
-					System.out.println("Erro! Contato de ID " + cttId + ", não encontrado, tente novamente.");
+					try {
+						Contato ctt = new Contato(completeName, phone, email);
+						new ContatoDAO().cadastrarContato(ctt);
+						System.out.println("Contato criado!");
+					}catch(Exception e) {
+						System.err.println("Erro ao criar contato: " + e.getMessage());
+					}
+					
+					
+					
+					break;
 				}
-				System.out.println("Mudando contato...");
-				break;
-			}
-			case 5:{
-				System.out.print("Insira o ID do contato: ");
-				int cttId = sc.nextInt();
-				sc.nextLine();
+				case 2:{//SELEÇÃO DE CONTATO VIA ID
+					System.out.print("Insira o ID do contato a abrir: ");
+					int cttId = sc.nextInt();
+					sc.nextLine();
+					Contato ctt = new ContatoDAO().selecaoContato(cttId);
+					if (ctt!=null) {
+						System.out.println(ctt);
+					} else {
+						System.out.println("Erro! Contato de ID " + cttId + ", não encontrado, tente novamente.");
+					}
+					
+					break;
+				}
 				
-				Contato cttReturned = searchContatoById(cttId);
-				if(cttReturned!= null) {
-					contacts.remove(cttReturned);
-					System.out.println("Contato removido com sucesso!");
-				} else {
-					System.out.println("Erro! Contato de ID " + cttId + ", não encontrado, tente novamente.");
+				case 3:{//ABRIR LISTA DE CONTATOS
+					
+					List<Contato> cttLista = new ContatoDAO().listaContatos();
+					if(!cttLista.isEmpty()) {
+						System.out.println("---------------------");
+						System.out.println("LISTA DE CONTATOS");
+						System.out.println("---------------------");
+						for (Contato contato : cttLista) {
+							
+							System.out.println(contato);
+							System.out.println("------------------");
+						}
+					} else {
+						System.out.println("Você não possui contatos! os Adicione para listá-los aqui.");
+					}
+
+					
+					break;
 				}
-				break;
+				case 4:{//Atualização de contato
+					System.out.print("Insira o ID do contato: ");
+					int cttId = sc.nextInt();
+					sc.nextLine();
+					Contato ctt = new ContatoDAO().selecaoContato(cttId);
+					if(ctt!=null) {
+						ctt.setId(cttId);
+						System.out.print("Insira o novo nome completo: ");
+						ctt.setNomeCompleto(sc.nextLine());
+						
+						System.out.print("Insira o novo telefone: ");
+						ctt.setTelefone(sc.nextLine());
+						
+						System.out.print("Insira o novo E-mail: ");
+						ctt.setEmail(sc.nextLine());
+						
+						try {
+							System.out.println("Mudando contato...");
+							
+							int atualizacao = new ContatoDAO().atualizarContato(cttId, ctt);
+							if (atualizacao > 0) {
+							    System.out.println("Contato atualizado com sucesso!");
+							} else {
+							    System.out.println("Nenhum contato foi atualizado. Verifique o ID fornecido.");
+							}
+						} catch(Exception e ) {
+							e.printStackTrace();
+						}
+						
+					} else {
+						System.out.println("Erro! Contato de ID " + cttId + ", não encontrado, tente novamente.");
+					}
+					break;
+				}
+				case 5:{ //REMOÇÃO DE CONTATO
+					System.out.print("Insira o ID do contato: ");
+					int cttId = sc.nextInt();
+					sc.nextLine();
+					
+					
+					try {
+						System.out.println("removendo contato...");
+						
+						int atualizacao = new ContatoDAO().removerContato(cttId);
+						if (atualizacao > 0) {
+						    System.out.println("Contato removido com sucesso!");
+						} else {
+						    System.out.println("Não foi possível remover o contato. Verifique o ID fornecido.");
+						}
+					} catch(Exception e ) {
+						e.printStackTrace();
+					}
+					
+					break;
+				}
+				case 6:{
+					programa = false;
+					break;
+				}
+				default:
+					System.err.println("Opção inválida! Tente novamente;");
+					break;
+				}
+				
 			}
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + opc);
-			}
+
+		}finally {
 			sc.close();
+			System.out.println("FIM DO PROGRAMA");
 		}
 	}
 	
@@ -128,16 +164,9 @@ public class Main {
 		System.out.println("+---+-------------------------+");
 		System.out.println("| 5 | Excluir Contato (ID)    |");
 		System.out.println("+---+-------------------------+");
+		System.out.println("| 6 | Finalizar sistema       |");
+		System.out.println("+---+-------------------------+");
 	}
-	
-    public static Contato searchContatoById(int id) {
-        for (Contato contatoUn : contacts) {
-            if (contatoUn.getId() == id) {
-                return contatoUn;
-            }
-        }
-        return null;
-    }
 }
 
 

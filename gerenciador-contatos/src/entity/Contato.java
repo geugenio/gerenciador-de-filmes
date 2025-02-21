@@ -1,3 +1,4 @@
+package entity;
 public class Contato {
 	private int id;
 	private String nomeCompleto;
@@ -6,23 +7,23 @@ public class Contato {
 	private String email;
 	
 	
-	
-	
-
-	public Contato(String nomeCompleto, String telefone, String email, int id) {
-		this.nomeCompleto = nomeCompleto;
-		this.nome = nomeCompleto.split(" ")[0];
+	public Contato(String nomeCompleto, String telefone, String email) {
+		this.setNomeCompleto(nomeCompleto);
 		this.telefone = telefone;
 		this.email = email;
-		this.setId(id);
 	}
 	
 	
+	public Contato() {
+	}
+
+
 	public String getNomeCompleto() {
 		return nomeCompleto;
 	}
 	public void setNomeCompleto(String nomeCompleto) {
 		this.nomeCompleto = nomeCompleto;
+		this.nome = nomeCompleto.split(" ")[0];
 	}
 	public String getNome() {
 		return nome;
